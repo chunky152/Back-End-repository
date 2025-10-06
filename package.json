@@ -1,20 +1,23 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "run": "node index.js",
-    "start": "nodemon index.js"
+    "run": "node server.js",
+    "start": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Muwanguzi Alvin Kiggundu",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "joi": "^18.0.1",
-    "mongoose": "^8.18.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.2",
+    "nodemon": "^3.1.10"
   },
   "devDependencies": {
     "@ljharb/tsconfig": "^0.3.2"
