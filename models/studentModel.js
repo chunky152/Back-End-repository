@@ -31,3 +31,4 @@ joiSchema = Joi.object({
 
 const Student = mongoose.model("Student", studentSchema);
 export { Student, joiSchema };
+
