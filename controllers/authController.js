@@ -6,15 +6,13 @@ import bcrypt from "bcryptjs";
 const genToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-// =========================
 // REGISTER
-// =========================
 export const registerStudent = async (req, res) => {
   try {
-    const { firstName, lastName, studentWebmail, password } = req.body;
+    const { name, studentWebmail, password } = req.body;
 
     // Validate input
-    if (!firstName || !lastName || !studentWebmail || !password) {
+    if (!name || !Webmail || !password) {
       return res.status(400).json({ msg: "All fields required" });
     }
 
@@ -30,17 +28,15 @@ export const registerStudent = async (req, res) => {
 
     // Create new student
     const student = await Student.create({
-      firstName,
-      lastName,
-      studentWebmail,
+      name,
+      Webmail,
       password: hashedPassword,
     });
 
     res.status(201).json({
       student: {
         id: student._id,
-        firstName: student.firstName,
-        lastName: student.lastName,
+        name: student.name,
         studentWebmail: student.studentWebmail,
       },
       token: genToken(student._id),
@@ -89,13 +85,9 @@ export const loginStudent = async (req, res) => {
   }
 };
 
-// =========================
 // LOGOUT
-// =========================
 export const logoutStudent = async (req, res) => {
   try {
-    // With JWT, logout = client removes token from localStorage/cookies
-    // (Optional: maintain a blacklist of invalidated tokens in DB/Redis)
     res.json({ msg: "Logged out successfully" });
   } catch (e) {
     res.status(500).json({ msg: e.message });
