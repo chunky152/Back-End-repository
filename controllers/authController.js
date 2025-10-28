@@ -1,6 +1,5 @@
-import Student from "../models/studentModel.js";
+import { Student, joiSchema } from "../models/studentModel.js";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 
 // Generate JWT token
 const genToken = (id) =>
@@ -11,44 +10,64 @@ export const registerStudent = async (req, res) => {
   try {
     const { name, studentWebmail, password } = req.body;
 
-    // Validate input
-    if (!name || !Webmail || !password) {
-      return res.status(400).json({ msg: "All fields required" });
+    // Validate input using Joi schema
+    const { error } = joiSchema.validate({ name, studentWebmail, password });
+    if (error) {
+      return res.status(400).json({ msg: error.details[0].message });
     }
 
     // Check if email already exists
-    const existingStudent = await Student.findOne({ studentWebmail });
+    const existingStudent = await Student.findOne({ 
+      studentWebmail: studentWebmail?.toLowerCase()
+    });
+    
     if (existingStudent) {
       return res.status(400).json({ msg: "Email already registered" });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create new student
+    // Create new student with trimmed and lowercase email
     const student = await Student.create({
-      name,
-      Webmail,
-      password: hashedPassword,
+      name: name.trim(),
+      studentWebmail: studentWebmail.toLowerCase().trim(),
+      password
     });
 
+    // Return student data
     res.status(201).json({
-      student: {
-        id: student._id,
+      success: true,
+      data: {
         name: student.name,
         studentWebmail: student.studentWebmail,
+        createdAt: student.createdAt
       },
-      token: genToken(student._id),
     });
+
   } catch (e) {
-    res.status(500).json({ msg: e.message });
+    if (e.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        msg: "A student with this email already exists"
+      });
+    }
+    
+    if (e.name === 'ValidationError') {
+      const messages = Object.values(e.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        msg: messages.join(', ')
+      });
+    }
+    
+    console.error('Registration error:', e);
+    res.status(500).json({ 
+      success: false,
+      msg: "An error occurred during registration",
+      error: e.message 
+    });
   }
 };
 
-// =========================
 // LOGIN
-// =========================
 export const loginStudent = async (req, res) => {
   try {
     const { studentWebmail, password } = req.body;
@@ -73,13 +92,10 @@ export const loginStudent = async (req, res) => {
     // Success
     res.json({
       student: {
-        id: student._id,
-        firstName: student.firstName,
-        lastName: student.lastName,
+        name: student.name,
         studentWebmail: student.studentWebmail,
       },
-      token: genToken(student._id),
-    });
+     });
   } catch (e) {
     res.status(500).json({ msg: e.message });
   }
