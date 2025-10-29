@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "run": "node server.js",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "test": "jest --runInBand"
   },
   "keywords": [],
   "author": "Muwanguzi Alvin Kiggundu",
@@ -22,6 +23,7 @@
     "nodemon": "^3.1.10"
   },
   "devDependencies": {
-    "@ljharb/tsconfig": "^0.3.2"
+    "@ljharb/tsconfig": "^0.3.2",
+    "jest": "^29.0.0"
   }
 }
