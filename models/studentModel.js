@@ -37,4 +37,4 @@ studentSchema.pre("save", async function(next) {
 });
 
 const Student = mongoose.model("students", studentSchema);
-export { Student, joiSchema };
+export default Student;

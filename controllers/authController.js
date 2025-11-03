@@ -1,5 +1,6 @@
-import { Student, joiSchema } from "../models/studentModel.js";
+import Student from "../models/studentModel.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 // Generate JWT token
 const genToken = (id) =>
@@ -37,11 +38,34 @@ export const registerStudent = async (req, res) => {
     });
 
   } catch (e) {
+    // Log the full error server-side for debugging
     console.error('Registration error:', e);
-    res.status(500).json({ 
+
+    // Handle Mongoose validation errors (bad input)
+    if (e.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        msg: 'Validation failed',
+        errors: e.errors,
+        error: e.message
+      });
+    }
+
+    // Handle duplicate key error (unique index) - e.g., email already exists
+    if (e.code === 11000) {
+      const field = Object.keys(e.keyValue || {})[0] || 'field';
+      return res.status(409).json({
+        success: false,
+        msg: `${field} already registered`,
+        error: e.message
+      });
+    }
+
+    // Fallback: internal server error
+    res.status(500).json({
       success: false,
-      msg: "An error occurred during registration",
-      error: e.message 
+      msg: 'An error occurred during registration',
+      error: e.message
     });
   }
 };
