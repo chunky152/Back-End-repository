@@ -7,4 +7,4 @@ const hostelSchema = new mongoose.Schema({
   pricePerRoom: { type: Number, required: true }
 }, { timestamps: true });
 
-export default mongoose.model("Hostel", hostelSchema);
+export default mongoose.model("Hostels", hostelSchema);

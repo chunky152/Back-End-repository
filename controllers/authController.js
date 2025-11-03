@@ -10,12 +10,6 @@ export const registerStudent = async (req, res) => {
   try {
     const { name, studentWebmail, password } = req.body;
 
-    // Validate input using Joi schema
-    const { error } = joiSchema.validate({ name, studentWebmail, password });
-    if (error) {
-      return res.status(400).json({ msg: error.details[0].message });
-    }
-
     // Check if email already exists
     const existingStudent = await Student.findOne({ 
       studentWebmail: studentWebmail?.toLowerCase()
@@ -43,21 +37,6 @@ export const registerStudent = async (req, res) => {
     });
 
   } catch (e) {
-    if (e.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        msg: "A student with this email already exists"
-      });
-    }
-    
-    if (e.name === 'ValidationError') {
-      const messages = Object.values(e.errors).map(err => err.message);
-      return res.status(400).json({
-        success: false,
-        msg: messages.join(', ')
-      });
-    }
-    
     console.error('Registration error:', e);
     res.status(500).json({ 
       success: false,

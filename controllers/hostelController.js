@@ -47,3 +47,11 @@ export const deleteHostel = async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 };
+
+// Default export (for modules that import the controller as a default)
+export default {
+  createHostel,
+  getAllHostels,
+  updateHostel,
+  deleteHostel,
+};
