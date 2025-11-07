@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    // Try MongoDB Atlas first
+    // Try MongoDB Atlas
     try {
       const conn = await mongoose.connect(process.env.MONGO_ATLAS_URL);
       console.log('MongoDB Atlas Connected successfully✅✅✅');

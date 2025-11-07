@@ -4,14 +4,56 @@ import Student from "../models/studentModel.js";
 // Create booking
 export const createBooking = async (req, res) => {
   try {
-    const { studentId, hostelName, roomNumber, duration } = req.body;
-    if (!studentId || !hostelName || !roomNumber || !duration)
-      return res.status(400).json({ msg: "All fields required" });
+    // Accept both authenticated (studentId) and guest bookings (form fields)
+    const {
+      studentId,
+      studentName,
+      email,
+      phoneNumber,
+      hostelName,
+      roomType,
+      checkInDate,
+      duration,
+      paymentMethod,
+      mobileNumber,
+      cardNumber
+    } = req.body;
 
-    const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ msg: "Student not found" });
+    // Basic required fields from the frontend form
+    if (!hostelName || !studentName || !email || !checkInDate)
+      return res.status(400).json({ msg: "hostelName, studentName, email and checkInDate are required" });
 
-    const booking = await Booking.create({ student: studentId, hostelName, roomNumber, duration });
+    // If a studentId is provided, ensure it exists (authenticated booking)
+    if (studentId) {
+      const student = await Student.findById(studentId);
+      if (!student) return res.status(404).json({ msg: "Student not found" });
+    }
+
+    // Parse checkInDate to Date if provided
+    let parsedCheckIn = null;
+    if (checkInDate) {
+      parsedCheckIn = new Date(checkInDate);
+      if (isNaN(parsedCheckIn.getTime())) {
+        return res.status(400).json({ msg: "Invalid checkInDate" });
+      }
+    }
+
+    const bookingData = {
+      // link to student if available
+      ...(studentId ? { student: studentId } : {}),
+      studentName,
+      email,
+      phoneNumber,
+      hostelName,
+      roomType,
+      checkInDate: parsedCheckIn,
+      duration,
+      paymentMethod,
+      mobileNumber,
+      cardNumber
+    };
+
+    const booking = await Booking.create(bookingData);
     res.status(201).json({ msg: "Booking created", booking });
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
@@ -21,7 +63,7 @@ export const createBooking = async (req, res) => {
 // Get all bookings
 export const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find().populate("student", "firstName lastName studentWebmail");
+    const bookings = await Booking.find().populate("student", "name studentWebmail");
     res.status(200).json(bookings);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });
